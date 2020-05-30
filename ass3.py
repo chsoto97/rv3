@@ -83,13 +83,8 @@ with torch.no_grad():
         disp_resized = torch.nn.functional.interpolate(
             disp, (original_height, original_width), mode="bilinear", align_corners=False)
 
-        # Saving numpy file
-        output_name = os.path.splitext(os.path.basename(image_path))[0]
-        name_dest_npy = os.path.join(output_directory, "{}_disp.npy".format(output_name))
-        scaled_disp, _ = disp_to_depth(disp, 0.1, 100)
-        np.save(name_dest_npy, scaled_disp.cpu().numpy())
-
         # Saving colormapped depth image
+        output_name = os.path.splitext(os.path.basename(image_path))[0]
         disp_resized_np = disp_resized.squeeze().cpu().numpy()
         vmax = np.percentile(disp_resized_np, 95)
         normalizer = mpl.colors.Normalize(vmin=disp_resized_np.min(), vmax=vmax)
@@ -97,7 +92,7 @@ with torch.no_grad():
         colormapped_im = (mapper.to_rgba(disp_resized_np)[:, :, :3] * 255).astype(np.uint8)
         im = pil.fromarray(colormapped_im)
 
-        name_dest_im = os.path.join(output_directory, "{}_disp.jpeg".format(output_name))
+        name_dest_im = os.path.join(output_directory, "{}_disp.png".format(output_name))
         im.save(name_dest_im)
 
         print("   Processed {:d} of {:d} images - saved prediction to {}".format(
